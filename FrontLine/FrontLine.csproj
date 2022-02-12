@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net6.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<RootNamespace>RurouniJones.Dcs.$(MSBuildProjectName.Replace(" ", "_"))</RootNamespace>
+		<AssemblyName>RurouniJones.Dcs.$(MSBuildProjectName)</AssemblyName>
+		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Geo" Version="1.0.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Reference Include="VoronoiLib">
+			<HintPath>..\..\Experiments\VoronoiLib\VoronoiLib\bin\Debug\netstandard1.1\VoronoiLib.dll</HintPath>
+		</Reference>
+	</ItemGroup>
+
+	<ItemGroup>
+		<AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
+			<_Parameter1>FrontLine.Tests</_Parameter1>
+		</AssemblyAttribute>
+	</ItemGroup>
+
+</Project>
