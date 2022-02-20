@@ -1,0 +1,114 @@
+﻿<Window x:Class="FrontLine.Visualizer.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:FrontLine.Visualizer"
+        xmlns:mapControl="clr-namespace:MapControl;assembly=MapControl.WPF"
+        mc:Ignorable="d"
+        Title="FrontLine Visualizer" Height="1080" Width="1920">
+    <Window.DataContext>
+        <local:MainViewModel/>
+    </Window.DataContext>
+    <Window.Resources>
+        <local:CoalitionPolygonConverter x:Key="CoalitionPolygonConverter"/>
+        <local:UnitSiteLocationConverter x:Key="UnitSiteLocationConverter"/>
+        <local:UnitSiteColorConverter x:Key="UnitSiteColorConverter"/>
+        <local:CoordinateLocationConverter x:Key="CoordinateLocationConverter"/>
+        <mapControl:WebMercatorProjection x:Key="WebMercatorProjection"/>
+        <Style x:Key="RedForPolygonStyle" TargetType="mapControl:MapItem">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="mapControl:MapItem">
+                        <mapControl:MapMultiPolygon Polygons="{Binding Converter={StaticResource CoalitionPolygonConverter}}" Stroke="Red" StrokeThickness="1" Fill="#55aa0000"/>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="MapEdgePolygonStyle" TargetType="mapControl:MapItem">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="mapControl:MapItem">
+                        <mapControl:MapMultiPolygon Polygons="{Binding Converter={StaticResource CoalitionPolygonConverter}}" Stroke="Green" StrokeThickness="2"/>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="BlueForPolygonStyle" TargetType="mapControl:MapItem">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="mapControl:MapItem">
+                        <mapControl:MapMultiPolygon Polygons="{Binding Converter={StaticResource CoalitionPolygonConverter}}" Stroke="Blue" StrokeThickness="1" Fill="#550000aa"/>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="SiteStyle" TargetType="mapControl:MapItem">
+            <Setter Property="Location" Value="{Binding Center, Converter={StaticResource CoordinateLocationConverter}}"/>
+            <Setter Property="HorizontalAlignment" Value="Left"/>
+            <Setter Property="VerticalAlignment" Value="Bottom"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="mapControl:MapItem">
+                        <mapControl:Pushpin Content="{Binding Center}" Background="{Binding Converter={StaticResource UnitSiteColorConverter}}" Foreground="White" />
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="CoordinateStyle" TargetType="mapControl:MapItem">
+            <Setter Property="Location" Value="{Binding Converter={StaticResource CoordinateLocationConverter}}"/>
+            <Setter Property="HorizontalAlignment" Value="Left"/>
+            <Setter Property="VerticalAlignment" Value="Bottom"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="mapControl:MapItem">
+                        <mapControl:Pushpin Content="{Binding}" />
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="1*" MinWidth="300" />
+            <ColumnDefinition Width="6*"/>
+        </Grid.ColumnDefinitions>
+        <StackPanel Grid.Column="0" Orientation="Vertical">
+            <StackPanel Orientation="Horizontal"  Margin="10,10,10,10">
+                <Label Content="Lon"/>
+                <TextBox x:Name="LonEntry" Width="30"/>
+                <Label Content="Lat"/>
+                <TextBox x:Name="LatEntry" Width="30"/>
+                <Label Content="Coalition"/>
+                <TextBox x:Name="ColEntry" Width="30"/>
+                <Button x:Name="AddPointButton" Content="Add Point" Command="{Binding AddPointCommand}" Margin="10,0,0,0"/>
+            </StackPanel>
+            <Button x:Name="GenerateUnitPolygons" Content="Generate Unit Polygons" Command="{Binding GenerateUnitPolygonsCommand}" Margin="10,0,10,10"/>
+            <Button x:Name="GenerateVoronoi" Content="Generate Frontlines" Command="{Binding GenerateVoronoiCommand}" Margin="10,0,10,0"/>
+        </StackPanel>
+        <mapControl:Map x:Name="MainMap" ZoomLevel="{Binding ZoomLevel}" MaxZoomLevel="21" MouseWheelZoomDelta="1"
+                        Center="{Binding MapLocation}" Grid.Column="1">
+            <mapControl:Map.MapProjection>
+                <StaticResource ResourceKey="WebMercatorProjection"/>
+            </mapControl:Map.MapProjection>
+            <mapControl:MapItemsControl ItemsSource="{Binding RedForPolygons}"
+                                        ItemContainerStyle="{StaticResource RedForPolygonStyle}"
+                                        Visibility="Visible"/>
+            <mapControl:MapItemsControl ItemsSource="{Binding BlueForPolygons}"
+                                        ItemContainerStyle="{StaticResource BlueForPolygonStyle}"
+                                        Visibility="Visible"/>
+            <mapControl:MapItemsControl ItemsSource="{Binding MapEdgePolygons}"
+                                        ItemContainerStyle="{StaticResource MapEdgePolygonStyle}"
+                                        Visibility="Visible"/>
+            <mapControl:MapItemsControl ItemsSource="{Binding Sites}"
+                                        ItemContainerStyle="{StaticResource SiteStyle}"
+                                        Visibility="Visible"/>
+            <mapControl:MapItemsControl ItemsSource="{Binding Coordinates}"
+                                        ItemContainerStyle="{StaticResource CoordinateStyle}"
+                                        Visibility="Visible"/>
+        </mapControl:Map>
+    </Grid>
+</Window>
+

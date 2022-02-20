@@ -1,0 +1,24 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<OutputType>WinExe</OutputType>
+		<TargetFramework>net6.0-windows</TargetFramework>
+		<Nullable>enable</Nullable>
+		<UseWPF>true</UseWPF>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="XAML.MapControl" Version="7.2.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\FrontLine\FrontLine.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Reference Include="VoronoiLib">
+	    <HintPath>..\..\Experiments\VoronoiLib\VoronoiLib\bin\Debug\netstandard1.1\VoronoiLib.dll</HintPath>
+	  </Reference>
+	</ItemGroup>
+
+</Project>

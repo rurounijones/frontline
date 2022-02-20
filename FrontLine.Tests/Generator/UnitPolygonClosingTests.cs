@@ -156,6 +156,50 @@ namespace RurouniJones.Dcs.FrontLine.Tests.Generator
             }
         }
 
+        // Test that we correctly close a polygon when two three corners form part of it
+        [TestMethod]
+        public void TestThreeCornerClosing()
+        {
+            var units = new List<FortuneSite>()
+            {
+                new UnitSite(1, 1, CoalitionId.RedFor),
+                new UnitSite(2, 2, CoalitionId.BlueFor),
+            };
+
+            var expected = new List<CoalitionPolygon>()
+            {
+                new CoalitionPolygon(CoalitionId.RedFor,
+                    new LinearRing(new List<Coordinate>()
+                    {
+                        new Coordinate(0, 3),
+                        new Coordinate(0, 0),
+                        new Coordinate(3, 0),
+                        new Coordinate(0, 3),
+                    }),
+                    NO_HOLES),
+                new CoalitionPolygon(CoalitionId.BlueFor,
+                    new LinearRing(new List<Coordinate>()
+                    {
+                        new Coordinate(10, 10),
+                        new Coordinate(0, 10),
+                        new Coordinate(0, 3),
+                        new Coordinate(3, 0),
+                        new Coordinate(10, 0),
+                        new Coordinate(10, 10),
+
+                    }),
+                    NO_HOLES)
+            };
+
+            var generator = new FrontLine.Generator(units, 0, 0, 10, 10);
+            var actual = generator.GenerateUnitPolygons();
+
+            foreach (var polygon in expected)
+            {
+                CollectionAssert.Contains(actual, polygon);
+            }
+        }
+
         #endregion
 
         [TestMethod]
