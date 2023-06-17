@@ -17,6 +17,9 @@ namespace RurouniJones.Dcs.FrontLine
     public class Generator
     {
         private List<FortuneSite> Sites { get; set; }
+
+        private List<CoalitionPolygon> CoalitionPolygons { get; set; }
+
         public double LeftLongitude { get; init; }
         public double BottomLatitude { get; init; }
         public double RightLongitude { get; init; }
@@ -53,7 +56,7 @@ namespace RurouniJones.Dcs.FrontLine
                 Dictionary<double, List<UnitSite>> closestSites = new();
                 foreach(var site in Sites)
                 {
-                    var distance = corner.CalculateGreatCircleLine(((UnitSite)site).Center).Distance.SiValue;
+                    double distance = GetDistance(((UnitSite)site).Center, corner);
                     if(closestSites.ContainsKey(distance))
                     {
                         closestSites[distance].Add((UnitSite)site);
@@ -72,41 +75,10 @@ namespace RurouniJones.Dcs.FrontLine
         public List<CoalitionPolygon> GenerateUnitPolygons()
         {
             GenerateSiteCells();
-            return Sites.Select(site => ToUnitPolygon((UnitSite)site))
+            return CoalitionPolygons
                 .OrderBy(polygon => polygon.Shell.Coordinates.First().Latitude)
                 .ThenBy(polygon => polygon.Shell.Coordinates.First().Longitude)
                 .ToList();
-        }
-
-        private static CoalitionPolygon ToUnitPolygon(UnitSite site)
-        {
-            HashSet<Coordinate> coordinates = new();
-            foreach (var edge in site.Cell)
-            {
-                coordinates.Add(new Coordinate(edge.Start.Y, edge.Start.X));
-                coordinates.Add(new Coordinate(edge.End.Y, edge.End.X));
-            }
-            Debug.WriteLine($"Clockwise bearing for center X: {site.Center.Longitude}, Y:{site.Center.Latitude}:");
-            return new CoalitionPolygon(site.Coalition,
-                ToClockwiseLinearRing(site.Center, coordinates),
-                new List<LinearRing>().ToArray());
-        }
-        private static LinearRing ToClockwiseLinearRing(Coordinate center, HashSet<Coordinate> coordinates)
-        {
-            var bearings = new SortedDictionary<double, Coordinate>();
-            foreach (var coordinate in coordinates)
-            {
-                var bearing = center.CalculateGreatCircleLine(coordinate).Bearing12;
-                bearings.Add(bearing, coordinate);
-            }
-            foreach (var pair in bearings)
-            {
-                Debug.WriteLine($"{pair.Key}. Coords: X: {pair.Value.Longitude}, Y:{pair.Value.Latitude}");
-            }
-            var sortedCoordinates = bearings.Values.ToList();
-            sortedCoordinates.Add(sortedCoordinates.First());
-
-            return new LinearRing(sortedCoordinates);
         }
 
         #endregion
@@ -115,7 +87,11 @@ namespace RurouniJones.Dcs.FrontLine
         public List<CoalitionPolygon> GenerateFrontLines()
         {
             GenerateSiteCells();
-
+            return CoalitionPolygons
+                .OrderBy(polygon => polygon.Shell.Coordinates.First().Latitude)
+                .ThenBy(polygon => polygon.Shell.Coordinates.First().Longitude)
+                .ToList();
+            /*
             List<CoalitionPolygon> combinedSites = new();
 
             while (true)
@@ -168,6 +144,7 @@ namespace RurouniJones.Dcs.FrontLine
             }
 
             return combinedSites;
+            */
         }
         private static CoalitionPolygon ToCombinedCoalitionPolygon(UnitSite site, List<Coordinate> coordinates)
         {
@@ -207,34 +184,25 @@ namespace RurouniJones.Dcs.FrontLine
         private LinkedList<VEdge>? GenerateSiteCells()
         {
             var edges = FortunesAlgorithm.Run(Sites.ToList(), LeftLongitude, BottomLatitude, RightLongitude, TopLatitude);
-            //Sites = Sites.AsParallel().Where(site => site.Cell.Count > 1).Select(site => CloseSite((UnitSite)site)).ToList();
-            Sites = Sites.AsParallel().Select(site => CloseSite((UnitSite)site)).ToList();
+            var coalitionPolygons = Sites.AsParallel().Select(site => CloseSite((UnitSite)site)).ToList();
+            coalitionPolygons.RemoveAll(polygon => polygon == null);
+            CoalitionPolygons = coalitionPolygons;
             return edges;
         }
 
-        // Close the site if we have any edges that go out of bounds
-        private FortuneSite CloseSite(UnitSite site)
+        // Close the site if we have any edges that go out of bounds, otherwise just return the polygon
+        private CoalitionPolygon CloseSite(UnitSite site)
         {
-            var zeroLengthEdges = site.Cell.Where(edge => edge.Start.X.Equals(edge.End.X) && edge.Start.Y.Equals(edge.End.Y)).ToList();
-            if (zeroLengthEdges.Count > 0)
+            if(site.Cell == null || site.Cell.Count == 0)
             {
-
-                //FIXME: THIS IS A HACK. WE DO NOT KNOW WHERE THESE ZERO LENGTH EDGES ARE COMING FROM
-                foreach (var edge in zeroLengthEdges)
-                {
-                    Debug.WriteLine($"Zero Length edge found for site. Center {site.Center}. Edge X/Y {edge.Start.X}/{edge.Start.Y}");
-                    site.Cell.Remove(edge);
-                }
-                //throw new Exception("The Site has edges with the same start and end points");
-
+                return null;
             }
 
             if (IsInBounds(site)) {
-                return site;
+                return ToCoalitionPolygon(site.Coalition, site.Points);
             }
+
             var outOfBoundsCoords = site.Coordinates.Where(coord => !IsInBounds(coord)).ToHashSet();
-            var start = outOfBoundsCoords.First();
-            var end = outOfBoundsCoords.Last();
 
             // First find out of we are a closest site to any of the map corners
             List<Coordinate> corners = new();
@@ -245,58 +213,31 @@ namespace RurouniJones.Dcs.FrontLine
                     corners.Add(pair.Key);
                 }
             }
-
-            if(corners.Count == 1)
-            {
-                // We are the closest site to a single corner which means we need to create two edges connecting the corner
-                // to our dangling edges
-                var corner = corners[0];
-                site.AddEdge(EdgeGenerator.CreateClockwiseCornerEdge(corner, start, site));
-                site.AddEdge(EdgeGenerator.CreateClockwiseCornerEdge(corner, end, site));
-            } else if(corners.Count == 2)
-            {
-                // We are the closest site to two corners which means we need to create three edges connecting our dangling
-                // edges to each corner AND an additional edge connecting the two corners
-
-                // First we connect the two corners
-                site.AddEdge(EdgeGenerator.CreateClockwiseCornerEdge(corners[0], corners[1], site));
-
-                // Then we connect each corner to the closes dangling edge if there is a gap
-                foreach(var corner in corners)
-                {
-                    if(corner.CalculateGreatCircleLine(start).Distance < corner.CalculateGreatCircleLine(end).Distance)
-                    {
-                        site.AddEdge(EdgeGenerator.CreateClockwiseCornerEdge(corner, start, site));
-                    }
-                    else
-                    {
-                        site.AddEdge(EdgeGenerator.CreateClockwiseCornerEdge(corner, end, site));
-                    }
-                }
-            } else if(corners.Count == 3)
-            {
-                HashSet<VEdge> connectedCorners = new();
-                foreach(var corner in corners)
-                {
-                    var connections = corners.Where(otherCorner => corner != otherCorner && (otherCorner.Latitude == corner.Latitude || otherCorner.Longitude == corner.Longitude)).ToList();
-                    foreach(var connection in connections)
-                    {
-                        connectedCorners.Add(EdgeGenerator.CreateClockwiseCornerEdge(corner, connection, site));
-                    }
-                }
-                foreach(var connectedCorner in connectedCorners)
-                {
-                    site.AddEdge(connectedCorner);
-                }
-            }
-            else
-            {
-                // We are not the closest site to any corner which means we connect our two dangling edges instead
-                // along the border
-                site.AddEdge(EdgeGenerator.CreateClockwiseNonCornerEdge(start, end, site));
+            foreach(var corner in corners) {               
+                site.AddEdge(new VEdge(new VPoint(corner.Longitude, corner.Latitude), site.Cell[0].Start, site.Cell[0].Left));
             }
 
-            return site;
+            return ToCoalitionPolygon(site.Coalition, site.Points);
+        }
+
+        private CoalitionPolygon ToCoalitionPolygon(CoalitionId coalition, IEnumerable<VPoint> points)
+        {
+            List<Coordinate> coordinates = new();
+            foreach (var point in points)
+            {
+                coordinates.Insert(0, new Coordinate(point.Y, point.X));
+            }
+            // Close the polygon
+            coordinates.Insert(0, coordinates.Last());
+
+            return new CoalitionPolygon(coalition,
+                new LinearRing(coordinates),
+                new List<LinearRing>().ToArray());
+        }
+
+        private static double GetDistance(Coordinate start, Coordinate end)
+        {
+            return Math.Sqrt(Math.Pow(end.Longitude - start.Longitude, 2) + Math.Pow(end.Latitude - start.Latitude, 2));
         }
 
         private bool IsInBounds(UnitSite site)

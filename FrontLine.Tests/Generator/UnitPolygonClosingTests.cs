@@ -17,8 +17,6 @@ namespace RurouniJones.Dcs.FrontLine.Tests.Generator
     {
         private static readonly LinearRing[] NO_HOLES = System.Array.Empty<LinearRing>();
 
-        #region Polygons without internal holes
-
         // Test that we correctly close polygons when a map corner forms part of the polygon
         [TestMethod]
         public void TestCornerClosing()
@@ -200,7 +198,54 @@ namespace RurouniJones.Dcs.FrontLine.Tests.Generator
             }
         }
 
-        #endregion
+        [TestMethod]
+        public void TestClosingPolygonWithEquidistantCenters()
+        {
+            var units = new List<FortuneSite>()
+            {
+                new UnitSite(1, 1, CoalitionId.RedFor),
+                new UnitSite(2, 2, CoalitionId.BlueFor),
+                new UnitSite(3, 3, CoalitionId.BlueFor),
+                new UnitSite(3, 4, CoalitionId.BlueFor),
+                new UnitSite(4, 3, CoalitionId.BlueFor),
+                new UnitSite(1, 2, CoalitionId.BlueFor),
+                new UnitSite(2, 1, CoalitionId.BlueFor)
+            };
+
+            var expected = new List<CoalitionPolygon>()
+            {
+                new CoalitionPolygon(CoalitionId.BlueFor,
+                    new LinearRing(new List<Coordinate>()
+                    {
+                        new Coordinate(10, 10),
+                        new Coordinate(3.5, 3.5),
+                        new Coordinate(3.5, 1.5),
+                        new Coordinate(5,0),
+                        new Coordinate(10, 0),
+                        new Coordinate(10, 10)
+                    }),
+                    NO_HOLES),
+                new CoalitionPolygon(CoalitionId.BlueFor,
+                    new LinearRing(new List<Coordinate>()
+                    {
+                        new Coordinate(10, 10),
+                        new Coordinate(0, 10),
+                        new Coordinate(0, 5),
+                        new Coordinate(1.5, 3.5),
+                        new Coordinate(3.5, 3.5),
+                        new Coordinate(10, 10)
+                    }),
+                    NO_HOLES),
+            };
+
+            var generator = new FrontLine.Generator(units, 0, 0, 10, 10);
+            var actual = generator.GenerateUnitPolygons();
+
+            foreach (var polygon in expected)
+            {
+                CollectionAssert.Contains(actual, polygon);
+            }
+        }
 
         [TestMethod]
         public void TestClosingNonEdgePolygon()

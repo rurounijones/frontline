@@ -132,24 +132,35 @@ namespace FrontLine.Visualizer
         public void AddPoint(object? parameter)
         {
             Sites = new HashSet<UnitSite>() {
+
+                /* PASS
                 new UnitSite(1, 1, CoalitionId.RedFor),
                 new UnitSite(2, 2, CoalitionId.BlueFor),
-                /*
+                */
+
+                /* PASS
                 new UnitSite(1, 1, CoalitionId.RedFor),
                 new UnitSite(2, 2, CoalitionId.BlueFor),
                 new UnitSite(1, 2, CoalitionId.BlueFor),
                 new UnitSite(2, 1, CoalitionId.BlueFor)
                 */
-
-                /*
-                new UnitSite(41, 41.1, CoalitionId.RedFor),
-                new UnitSite(42, 42.2, CoalitionId.BlueFor),
-                new UnitSite(43, 43.1, CoalitionId.BlueFor),
-                new UnitSite(43, 44.2, CoalitionId.BlueFor),
-                new UnitSite(44, 43.1, CoalitionId.BlueFor),
-                new UnitSite(41, 42.2, CoalitionId.BlueFor),
-                new UnitSite(42, 41.1, CoalitionId.BlueFor)
+                /* PASS
+                new UnitSite(4, 4, CoalitionId.RedFor),
+                new UnitSite(4, 5, CoalitionId.BlueFor),
+                new UnitSite(5, 5, CoalitionId.BlueFor),
+                new UnitSite(5, 4, CoalitionId.BlueFor),
+                new UnitSite(3, 4, CoalitionId.BlueFor),
+                new UnitSite(4, 3, CoalitionId.BlueFor),
+                new UnitSite(3, 3, CoalitionId.BlueFor),
                 */
+                
+                new UnitSite(1, 1, CoalitionId.RedFor),
+                new UnitSite(2, 2, CoalitionId.BlueFor),
+                new UnitSite(3, 3, CoalitionId.BlueFor),
+                new UnitSite(3, 4, CoalitionId.BlueFor),
+                new UnitSite(4, 3, CoalitionId.BlueFor),
+                new UnitSite(1, 2, CoalitionId.BlueFor),
+                new UnitSite(2, 1, CoalitionId.BlueFor)
             };
         }
 

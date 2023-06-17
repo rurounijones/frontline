@@ -81,7 +81,8 @@ namespace RurouniJones.Dcs.FrontLine
                     return new VEdge(cornerPoint, edgePoint, site);
                 }
             }
-
+            //HACK - Just create an Edge
+            //return new VEdge(edgePoint, cornerPoint, site);
             throw new Exception("Could not create a clockwise edge");
         }
 
