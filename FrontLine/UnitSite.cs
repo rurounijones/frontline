@@ -1,10 +1,10 @@
 ﻿using Geo;
+using SharpVoronoiLib;
 using System.Text;
-using VoronoiLib.Structures;
 
 namespace RurouniJones.Dcs.FrontLine
 {
-    public class UnitSite : FortuneSite
+    public class UnitSite : VoronoiSite
     {
         public CoalitionId Coalition { get; init; }
         public double Latitude { get { return Y; } }
@@ -21,15 +21,7 @@ namespace RurouniJones.Dcs.FrontLine
         {
             Coalition = coalition;
             Center = new Coordinate(latitude, longitude);
-        }
-
-        public new void AddEdge(VEdge value)
-        {
-            if (value.Start != null && value.End != null && !double.IsNaN(value.Start.X) && !double.IsNaN(value.Start.Y) && !double.IsNaN(value.End.X) && !double.IsNaN(value.End.Y))
-            {
-                Cell.Add(value);
-            }
-        }
+        }       
 
         public override string ToString()
         {

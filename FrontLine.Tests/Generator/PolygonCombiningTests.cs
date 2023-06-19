@@ -2,7 +2,7 @@
 using Geo.Geometries;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
-using VoronoiLib.Structures;
+using SharpVoronoiLib;
 
 namespace RurouniJones.Dcs.FrontLine.Tests.Generator
 {
@@ -21,7 +21,7 @@ namespace RurouniJones.Dcs.FrontLine.Tests.Generator
         [TestMethod]
         public void TestCombiningPolygons()
         {
-            var units = new List<FortuneSite>()
+            var units = new List<VoronoiSite>()
             {
                 new UnitSite(1, 1, CoalitionId.RedFor),
                 new UnitSite(2, 2, CoalitionId.BlueFor),
@@ -69,7 +69,7 @@ namespace RurouniJones.Dcs.FrontLine.Tests.Generator
         [TestMethod]
         public void TestCombiningPolygonsWithConcavePolygons()
         {
-            var units = new List<FortuneSite>()
+            var units = new List<VoronoiSite>()
             {
                 new UnitSite(6, 1, CoalitionId.RedFor),
                 new UnitSite(6, 2, CoalitionId.RedFor),
@@ -136,7 +136,7 @@ namespace RurouniJones.Dcs.FrontLine.Tests.Generator
         [TestMethod]
         public void TestCombiningPolygonsWithLongDistances()
         {
-            var units = new List<FortuneSite>()
+            var units = new List<VoronoiSite>()
             {
                 new UnitSite(2, 1, CoalitionId.RedFor),
                 new UnitSite(2, 2, CoalitionId.RedFor),
@@ -191,7 +191,7 @@ namespace RurouniJones.Dcs.FrontLine.Tests.Generator
         [TestMethod]
         public void TestCombiningPolygonsWithCloseUnitsOfSameCoalition()
         {
-            var units = new List<FortuneSite>()
+            var units = new List<VoronoiSite>()
             {
                 new UnitSite(1, 1, CoalitionId.RedFor),
                 new UnitSite(2, 2, CoalitionId.BlueFor),

@@ -105,7 +105,7 @@ namespace FrontLine.Visualizer
         private ICommand _generateVoronoiCommand;
         public ICommand GenerateVoronoiCommand
         {
-            get { return _generateVoronoiCommand ??= new DelegateCommand(GenerateVoronoi); }
+            get { return _generateVoronoiCommand ??= new DelegateCommand(GenerateFrontlines); }
         }
 
         public MainViewModel()
@@ -184,7 +184,7 @@ namespace FrontLine.Visualizer
             Coordinates = coordinates;
         }
 
-        public void GenerateVoronoi(object? parameter)
+        public void GenerateFrontlines(object? parameter)
         {
             AddPoint(null);
 

@@ -21,9 +21,9 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<Reference Include="VoronoiLib">
-			<HintPath>..\..\Experiments\VoronoiLib\VoronoiLib\bin\Debug\netstandard1.1\VoronoiLib.dll</HintPath>
-		</Reference>
+	  <Reference Include="SharpVoronoiLib">
+	    <HintPath>..\..\SharpVoronoiLib\SharpVoronoiLib\bin\Debug\netstandard2.0\SharpVoronoiLib.dll</HintPath>
+	  </Reference>
 	</ItemGroup>
 
 </Project>
