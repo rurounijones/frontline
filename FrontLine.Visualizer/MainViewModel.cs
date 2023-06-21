@@ -34,6 +34,15 @@ namespace FrontLine.Visualizer
         private const double _rightLongitude = 10;
         private const double _topLatitude = 10;
 
+        private Dictionary<string, List<UnitSite>> _sampleSets = Samples.Sites;
+        private HashSet<UnitSite> _currentSites = new();
+
+
+        public List<string> SampleSetNames
+        {
+            get => _sampleSets.Keys.ToList();
+        }
+
         private List<CoalitionPolygon> _redForPolygons = new();
         public List<CoalitionPolygon> RedForPolygons
         {
@@ -108,11 +117,24 @@ namespace FrontLine.Visualizer
             get { return _generateVoronoiCommand ??= new DelegateCommand(GenerateFrontlines); }
         }
 
+        private ICommand _addSampleSetCommand;
+        public ICommand AddSampleSetCommand
+        {
+            get { return _addSampleSetCommand ??= new DelegateCommand(AddSampleSet); }
+        }
+
+        private ICommand _clearMapCommand;
+        public ICommand ClearMapCommand
+        {
+            get { return _clearMapCommand ??= new DelegateCommand(ClearMap); }
+        }
+
         public MainViewModel()
         {
             MapLocation = new Location(5, 5);
             ZoomLevel = 7;
             MouseLocation = new Location(5, 5);
+            Sites = new HashSet<UnitSite>() {};
 
             List<Coordinate> mapCorners = new() {
                 new Coordinate(_topLatitude,    _rightLongitude),
@@ -131,42 +153,37 @@ namespace FrontLine.Visualizer
 
         public void AddPoint(object? parameter)
         {
-            Sites = new HashSet<UnitSite>() {
+        }
 
-                /* PASS
-                new UnitSite(1, 1, CoalitionId.RedFor),
-                new UnitSite(2, 2, CoalitionId.BlueFor),
-                */
+        public void AddSampleSet(object? parameter)
+        {
+            if (parameter == null) return;
+            RedForPolygons = new List<CoalitionPolygon>();
+            BlueForPolygons = new List<CoalitionPolygon>();
+            Coordinates = new HashSet<Coordinate>();
+            _currentSites = _sampleSets[parameter.ToString()].ToHashSet();
+            Sites = CopyCurrentSites();
+        }
 
-                /* PASS
-                new UnitSite(1, 1, CoalitionId.RedFor),
-                new UnitSite(2, 2, CoalitionId.BlueFor),
-                new UnitSite(1, 2, CoalitionId.BlueFor),
-                new UnitSite(2, 1, CoalitionId.BlueFor)
-                */
-                /* PASS
-                new UnitSite(4, 4, CoalitionId.RedFor),
-                new UnitSite(4, 5, CoalitionId.BlueFor),
-                new UnitSite(5, 5, CoalitionId.BlueFor),
-                new UnitSite(5, 4, CoalitionId.BlueFor),
-                new UnitSite(3, 4, CoalitionId.BlueFor),
-                new UnitSite(4, 3, CoalitionId.BlueFor),
-                new UnitSite(3, 3, CoalitionId.BlueFor),
-                */
-                
-                new UnitSite(1, 1, CoalitionId.RedFor),
-                new UnitSite(2, 2, CoalitionId.BlueFor),
-                new UnitSite(3, 3, CoalitionId.BlueFor),
-                new UnitSite(3, 4, CoalitionId.BlueFor),
-                new UnitSite(4, 3, CoalitionId.BlueFor),
-                new UnitSite(1, 2, CoalitionId.BlueFor),
-                new UnitSite(2, 1, CoalitionId.BlueFor)
-            };
+        public void ClearMap(object? parameter)
+        {
+            _currentSites.Clear();
+            Sites = new HashSet<UnitSite>();
+            RedForPolygons = new List<CoalitionPolygon>();
+            BlueForPolygons = new List<CoalitionPolygon>();
+            Coordinates = new HashSet<Coordinate>();
+        }
+
+        private HashSet<UnitSite> CopyCurrentSites()
+        {
+            return _currentSites.Select(site => new UnitSite(site.Longitude, site.Latitude, site.Coalition)).ToHashSet();
         }
 
         public void GenerateUnitPolygons(object? parameter)
         {
-            AddPoint(null);
+            if (_currentSites.Count == 0) return;
+            Sites = CopyCurrentSites();
+
             var generator = new Generator(Sites, _leftLongitude, _bottomLatitude, _rightLongitude, _topLatitude);
             var results = generator.GenerateUnitPolygons();
 
@@ -186,7 +203,8 @@ namespace FrontLine.Visualizer
 
         public void GenerateFrontlines(object? parameter)
         {
-            AddPoint(null);
+            if (_currentSites.Count == 0) return;
+            Sites = CopyCurrentSites();
 
             var generator = new Generator(Sites, _leftLongitude, _bottomLatitude, _rightLongitude, _topLatitude);
             var results = generator.GenerateFrontLines();

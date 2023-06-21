@@ -85,8 +85,20 @@
                 <TextBox x:Name="ColEntry" Width="30"/>
                 <Button x:Name="AddPointButton" Content="Add Point" Command="{Binding AddPointCommand}" Margin="10,0,0,0"/>
             </StackPanel>
-            <Button x:Name="GenerateUnitPolygons" Content="Generate Unit Polygons" Command="{Binding GenerateUnitPolygonsCommand}" Margin="10,0,10,10"/>
-            <Button x:Name="GenerateVoronoi" Content="Generate Frontlines" Command="{Binding GenerateVoronoiCommand}" Margin="10,0,10,0"/>
+            <StackPanel Orientation="Horizontal"  Margin="10,10,10,10">
+                <Label Content="Set"/>
+                <ComboBox x:Name="SampleSet" Width="175" ItemsSource="{Binding SampleSetNames}"/>
+                <Button x:Name="AddSetButton" Content="Load Set" Command="{Binding AddSampleSetCommand}" CommandParameter="{Binding ElementName=SampleSet, Path=SelectedItem}" Margin="10,0,0,0"/>
+            </StackPanel>
+            <StackPanel Orientation="Vertical"  Margin="10,10,10,10">
+                <Button x:Name="ClearPointsButton" Content="Clear Map" Command="{Binding ClearMapCommand}"/>
+            </StackPanel>
+            <Separator Margin="10,0,10,0"/>
+            <StackPanel Orientation="Vertical"  Margin="10,10,10,10">
+                <Button x:Name="GenerateUnitPolygons" Content="Generate Unit Polygons" Command="{Binding GenerateUnitPolygonsCommand}" Margin="0,0,0,10"/>
+                <Button x:Name="GenerateVoronoi" Content="Generate Frontlines" Command="{Binding GenerateVoronoiCommand}" />
+            </StackPanel>
+
         </StackPanel>
         <mapControl:Map x:Name="MainMap" ZoomLevel="{Binding ZoomLevel}" MaxZoomLevel="21" MouseWheelZoomDelta="1"
                         Center="{Binding MapLocation}" Grid.Column="1">

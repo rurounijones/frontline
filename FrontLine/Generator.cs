@@ -61,28 +61,13 @@ namespace RurouniJones.Dcs.FrontLine
                 RightLongitude, TopLatitude
             );
 
-            CoalitionPolygons = Sites.AsParallel().Select(site => ToCoalitionPolygon((UnitSite)site)).ToList();
+            //CoalitionPolygons = Sites.AsParallel().Select(site => ToCoalitionPolygon((UnitSite)site)).ToList();
+            CoalitionPolygons = Sites.Select(site => ToCoalitionPolygon((UnitSite)site)).ToList();
 
             return CoalitionPolygons
                 .OrderBy(polygon => polygon.Shell.Coordinates.First().Latitude)
                 .ThenBy(polygon => polygon.Shell.Coordinates.First().Longitude)
                 .ToList();
-        }
-
-        private static CoalitionPolygon ToCoalitionPolygon(UnitSite site)
-        {
-            List < Coordinate > coordinates = new();
-            foreach (var point in site.ClockwisePoints)
-            {
-                coordinates.Add(new Coordinate(point.Y, point.X));
-            }
-            
-            // Close the polygon
-            coordinates.Insert(0, coordinates.Last());
-
-            return new CoalitionPolygon(site.Coalition,
-                new LinearRing(coordinates),
-                new List<LinearRing>().ToArray());
         }
 
         #endregion
@@ -108,7 +93,23 @@ namespace RurouniJones.Dcs.FrontLine
 
         private VoronoiSiteMergeDecision CoalitionMergeDecision(UnitSite site1, UnitSite site2)
         {
-            return site1.Coalition == site2.Coalition ? VoronoiSiteMergeDecision.MergeIntoSite2 : VoronoiSiteMergeDecision.DontMerge;
+            return site1.Coalition == site2.Coalition ? VoronoiSiteMergeDecision.MergeIntoSite1 : VoronoiSiteMergeDecision.DontMerge;
+        }
+
+        private static CoalitionPolygon ToCoalitionPolygon(UnitSite site)
+        {
+            List<Coordinate> coordinates = new();
+            foreach (var point in site.ClockwisePoints)
+            {
+                coordinates.Add(new Coordinate(point.Y, point.X));
+            }
+
+            // Close the polygon
+            coordinates.Insert(0, coordinates.Last());
+
+            return new CoalitionPolygon(site.Coalition,
+                new LinearRing(coordinates),
+                new List<LinearRing>().ToArray());
         }
 
         #endregion
