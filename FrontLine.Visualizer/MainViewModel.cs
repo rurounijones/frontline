@@ -43,6 +43,13 @@ namespace FrontLine.Visualizer
             get => _sampleSets.Keys.ToList();
         }
 
+        private List<CoalitionPolygon> _neutralPolygons = new();
+        public List<CoalitionPolygon> NeutralPolygons
+        {
+            get => _neutralPolygons;
+            set => SetProperty(ref _neutralPolygons, value);
+        }
+
         private List<CoalitionPolygon> _redForPolygons = new();
         public List<CoalitionPolygon> RedForPolygons
         {
@@ -160,6 +167,7 @@ namespace FrontLine.Visualizer
             if (parameter == null) return;
             RedForPolygons = new List<CoalitionPolygon>();
             BlueForPolygons = new List<CoalitionPolygon>();
+            NeutralPolygons = new List<CoalitionPolygon>();
             Coordinates = new HashSet<Coordinate>();
             _currentSites = _sampleSets[parameter.ToString()].ToHashSet();
             Sites = CopyCurrentSites();
@@ -171,6 +179,7 @@ namespace FrontLine.Visualizer
             Sites = new HashSet<UnitSite>();
             RedForPolygons = new List<CoalitionPolygon>();
             BlueForPolygons = new List<CoalitionPolygon>();
+            NeutralPolygons = new List<CoalitionPolygon>();
             Coordinates = new HashSet<Coordinate>();
         }
 
@@ -187,6 +196,7 @@ namespace FrontLine.Visualizer
             var generator = new Generator(Sites, _leftLongitude, _bottomLatitude, _rightLongitude, _topLatitude);
             var results = generator.GenerateUnitPolygons();
 
+            NeutralPolygons = results.Where(x => x.Coalition == CoalitionId.Neutral).ToList();
             RedForPolygons = results.Where(x => x.Coalition == CoalitionId.RedFor).ToList();
             BlueForPolygons = results.Where(x => x.Coalition == CoalitionId.BlueFor).ToList();
 
@@ -208,6 +218,7 @@ namespace FrontLine.Visualizer
 
             var generator = new Generator(Sites, _leftLongitude, _bottomLatitude, _rightLongitude, _topLatitude);
             var results = generator.GenerateFrontLines();
+            NeutralPolygons = results.Where(x => x.Coalition == CoalitionId.Neutral).ToList();
             RedForPolygons = results.Where(x => x.Coalition == CoalitionId.RedFor).ToList();
             BlueForPolygons = results.Where(x => x.Coalition == CoalitionId.BlueFor).ToList();
 

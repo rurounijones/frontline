@@ -10,7 +10,21 @@ namespace FrontLine.Visualizer
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             var site = (UnitSite)value;
-            return site.Coalition == CoalitionId.RedFor ? "Red" : "Blue";
+            if (site.Coalition == CoalitionId.Neutral)
+            {
+                return "Green";
+            }
+            else if (site.Coalition == CoalitionId.RedFor)
+            {
+                return "Red";
+            }
+            else if (site.Coalition == CoalitionId.BlueFor)
+            {
+                return "Blue";
+            } else
+            { 
+                return "Orange";
+            }
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

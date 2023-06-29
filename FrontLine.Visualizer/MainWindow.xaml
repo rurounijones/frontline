@@ -16,21 +16,21 @@
         <local:UnitSiteColorConverter x:Key="UnitSiteColorConverter"/>
         <local:CoordinateLocationConverter x:Key="CoordinateLocationConverter"/>
         <mapControl:WebMercatorProjection x:Key="WebMercatorProjection"/>
+        <Style x:Key="NeutralPolygonStyle" TargetType="mapControl:MapItem">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="mapControl:MapItem">
+                        <mapControl:MapMultiPolygon Polygons="{Binding Converter={StaticResource CoalitionPolygonConverter}}" Stroke="Green" StrokeThickness="1" Fill="#5500aa00"/>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        
         <Style x:Key="RedForPolygonStyle" TargetType="mapControl:MapItem">
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="mapControl:MapItem">
                         <mapControl:MapMultiPolygon Polygons="{Binding Converter={StaticResource CoalitionPolygonConverter}}" Stroke="Red" StrokeThickness="1" Fill="#55aa0000"/>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-        <Style x:Key="MapEdgePolygonStyle" TargetType="mapControl:MapItem">
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="mapControl:MapItem">
-                        <mapControl:MapMultiPolygon Polygons="{Binding Converter={StaticResource CoalitionPolygonConverter}}" Stroke="Green" StrokeThickness="2"/>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
@@ -45,6 +45,17 @@
                 </Setter.Value>
             </Setter>
         </Style>
+
+        <Style x:Key="MapEdgePolygonStyle" TargetType="mapControl:MapItem">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="mapControl:MapItem">
+                        <mapControl:MapMultiPolygon Polygons="{Binding Converter={StaticResource CoalitionPolygonConverter}}" Stroke="Black" StrokeThickness="2"/>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
         <Style x:Key="SiteStyle" TargetType="mapControl:MapItem">
             <Setter Property="Location" Value="{Binding Center, Converter={StaticResource CoordinateLocationConverter}}"/>
             <Setter Property="HorizontalAlignment" Value="Left"/>
@@ -105,6 +116,9 @@
             <mapControl:Map.MapProjection>
                 <StaticResource ResourceKey="WebMercatorProjection"/>
             </mapControl:Map.MapProjection>
+            <mapControl:MapItemsControl ItemsSource="{Binding NeutralPolygons}"
+                                        ItemContainerStyle="{StaticResource NeutralPolygonStyle}"
+                                        Visibility="Visible"/>
             <mapControl:MapItemsControl ItemsSource="{Binding RedForPolygons}"
                                         ItemContainerStyle="{StaticResource RedForPolygonStyle}"
                                         Visibility="Visible"/>

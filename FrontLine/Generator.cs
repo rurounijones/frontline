@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
+using System.Linq;
 
 namespace RurouniJones.Dcs.FrontLine
 {
@@ -84,6 +85,7 @@ namespace RurouniJones.Dcs.FrontLine
             );
 
             CoalitionPolygons = Sites.AsParallel().Select(site => ToCoalitionPolygon((UnitSite)site)).ToList();
+            CoalitionPolygons.RemoveAll( site => site == null);
 
             return CoalitionPolygons
                 .OrderBy(polygon => polygon.Shell.Coordinates.First().Latitude)
@@ -99,17 +101,111 @@ namespace RurouniJones.Dcs.FrontLine
         private static CoalitionPolygon ToCoalitionPolygon(UnitSite site)
         {
             List<Coordinate> coordinates = new();
-            foreach (var point in site.ClockwisePoints)
+
+            if(site.ClockwiseCell.Count() == 0)
             {
-                coordinates.Add(new Coordinate(point.Y, point.X));
+                return null;
             }
 
-            // Close the polygon
-            coordinates.Insert(0, coordinates.Last());
+            var cells = site.ClockwiseCell.ToList();
 
-            return new CoalitionPolygon(site.Coalition,
-                new LinearRing(coordinates),
-                new List<LinearRing>().ToArray());
+            var borders = new List<List<Coordinate>>()
+            {
+                getBorder(cells)
+            };
+            
+            // At this point we have at least one set of coordinates. But if there are still coordinates left then we may have holes
+            // In our polygon
+
+            while(cells.Count > 0)
+            {
+                borders.Add(getBorder(cells));
+            }
+            borders.RemoveAll(border => border == null);
+
+            if(borders.Count > 1) {
+                var orderedBorders = borders.OrderBy(border => getBorderLength(border)).Reverse();
+                var shell = new LinearRing(orderedBorders.First());
+
+                var holes = new List<LinearRing>();
+
+                foreach(var border in orderedBorders.Skip(1))
+                {
+                    holes.Add(new LinearRing(border));
+                }
+
+
+                return new CoalitionPolygon(site.Coalition,
+                    shell,
+                    holes.ToArray());
+            } else if(borders.Count == 1)
+            {
+                return new CoalitionPolygon(site.Coalition,
+                    new LinearRing(borders.First()),
+                    new List<LinearRing>().ToArray());
+            }
+            {
+                return null;
+            }
+        }
+
+        private static List<Coordinate> getBorder(List<VoronoiEdge> cells)
+        {
+            var startCell = cells.First();
+            var startPoint = startCell.Start;
+
+            List<Coordinate> coordinates = new()
+            {
+                new Coordinate(startPoint.Y, startPoint.X)
+            };
+
+            int i = 0;
+            bool stop = false;
+            while (stop == false)
+            {
+
+                var latest = coordinates.Last();
+                foreach (var cell in cells)
+                {
+                    var start = new Coordinate(cell.Start.Y, cell.Start.X);
+                    var end = new Coordinate(cell.End.Y, cell.End.X);
+                    if (start == latest)
+                    {
+                        coordinates.Add(end);
+                        cells.Remove(cell);
+                        break;
+                    }
+                    else if (end == latest)
+                    {
+                        coordinates.Add(start);
+                        cells.Remove(cell);
+                        break;
+                    }
+                }
+                i++;
+                if (coordinates.First() == coordinates.Last())
+                {
+                    stop = true;
+                }
+                if(i > 100)
+                {
+                    return null;
+                }
+            }
+
+            return coordinates;
+        }
+
+        private static double getBorderLength(List<Coordinate> points)
+        {
+            double distance = 0;
+            for (int i = 0; i < points.Count-1; i++)
+            {
+                var start = points[i];
+                var end = points[i+1];
+                distance += Math.Sqrt(Math.Pow(end.Longitude - start.Longitude, 2) + Math.Pow(end.Latitude - start.Latitude, 2));
+            }
+            return distance;
         }
 
         #endregion

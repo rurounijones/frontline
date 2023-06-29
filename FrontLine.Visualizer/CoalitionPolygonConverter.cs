@@ -13,8 +13,16 @@ namespace FrontLine.Visualizer
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             var polygon = (CoalitionPolygon) value;
-            var locations = polygon.Shell.Coordinates.Select(coord => new Location(coord.Latitude, coord.Longitude)).ToList();
-            return new List<List<Location>>() { locations };
+
+            var borders = new List<List<Location>>() {
+                polygon.Shell.Coordinates.Select(coord => new Location(coord.Latitude, coord.Longitude)).ToList()
+            };
+
+            foreach (var hole in polygon.Holes) {
+                borders.Add(hole.Coordinates.Select(coord => new Location(coord.Latitude, coord.Longitude)).ToList());
+            }
+
+            return borders;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

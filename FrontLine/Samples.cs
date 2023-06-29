@@ -34,6 +34,16 @@ namespace FrontLine.Visualizer
                 }
             },
             {
+                "N/S Neutral East", new List<UnitSite>() {
+                    new UnitSite(2, 7, CoalitionId.RedFor),
+                    new UnitSite(5, 7, CoalitionId.RedFor),
+                    new UnitSite(8, 7, CoalitionId.Neutral),
+                    new UnitSite(2, 3, CoalitionId.BlueFor),
+                    new UnitSite(5, 3, CoalitionId.BlueFor),
+                    new UnitSite(8, 3, CoalitionId.Neutral),
+                }
+            },
+            {
                 "N/S weak salient", new List<UnitSite>() {
                     new UnitSite(2, 7, CoalitionId.RedFor),
                     new UnitSite(5, 7, CoalitionId.RedFor),
@@ -98,6 +108,23 @@ namespace FrontLine.Visualizer
                     new UnitSite(3, 7, CoalitionId.BlueFor),
                     new UnitSite(7, 3, CoalitionId.BlueFor),
                     new UnitSite(7, 7, CoalitionId.BlueFor),
+                }
+            },
+            {
+                "Red 5,5 Double Surrounded", new List<UnitSite>() {
+                    new UnitSite(5, 5, CoalitionId.RedFor),
+                    new UnitSite(2, 5, CoalitionId.BlueFor),
+                    new UnitSite(5, 2, CoalitionId.BlueFor),
+                    new UnitSite(8, 5, CoalitionId.BlueFor),
+                    new UnitSite(5, 8, CoalitionId.BlueFor),
+                    new UnitSite(1, 1, CoalitionId.RedFor),
+                    new UnitSite(1, 5, CoalitionId.RedFor),
+                    new UnitSite(1, 9, CoalitionId.RedFor),
+                    new UnitSite(5, 9, CoalitionId.RedFor),
+                    new UnitSite(9, 9, CoalitionId.RedFor),
+                    new UnitSite(9, 5, CoalitionId.RedFor),
+                    new UnitSite(9, 1, CoalitionId.RedFor),
+                    new UnitSite(5, 1, CoalitionId.RedFor),
                 }
             },
         };

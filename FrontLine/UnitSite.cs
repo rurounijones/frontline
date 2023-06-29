@@ -1,4 +1,5 @@
 ﻿using Geo;
+using Geo.Geodesy;
 using SharpVoronoiLib;
 using System.Text;
 
@@ -21,7 +22,12 @@ namespace RurouniJones.Dcs.FrontLine
         {
             Coalition = coalition;
             Center = new Coordinate(latitude, longitude);
-        }       
+        }
+
+        public double DistanceTo(UnitSite otherSite)
+        {
+            return Center.CalculateGreatCircleLine(otherSite.Center).Distance.ConvertTo(Geo.Measure.DistanceUnit.Km).SiValue;
+        }
 
         public override string ToString()
         {
